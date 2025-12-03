@@ -2,7 +2,7 @@
 
 ![SmartBrain Banner](./smart-brain.png)
 
-> **SmartBrain** is a comprehensive student management system designed to organize your academic life. From tracking assignments and grades to managing your study schedule and resources, SmartBrain acts as your digital "Second Brain," helping you stay focused and achieve your goals.
+ **SmartBrain** is a comprehensive student management system designed to organize your academic life. From tracking assignments and grades to managing your study schedule and resources, SmartBrain acts as your digital "Second Brain," helping you stay focused and achieve your goals.
 
 ---
 
