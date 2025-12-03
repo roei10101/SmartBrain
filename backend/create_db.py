@@ -12,10 +12,10 @@ load_dotenv(BASE_DIR / ".env")
 # Get credentials from env, but connect to 'postgres' db first
 db_url = os.getenv("DATABASE_URL")
 # Parse the URL manually or just hardcode for creation since we know the structure
-# postgresql://postgres:159811@localhost:5432/smartbrain
+# postgresql://postgres:postgresdemo@localhost:5432/smartbrain
 
 user = "postgres"
-password = "159811"
+password = "postgresdemo"
 host = "localhost"
 port = "5432"
 dbname = "smartbrain"
