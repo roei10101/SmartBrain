@@ -15,7 +15,7 @@ app = FastAPI(title="Student Second Brain API")
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://smartbrain.roeiduenyas.me"], # Vite default port
+    allow_origins=["https://smartbrain.roeiduenyas.me", "http://smartbrain.roeiduenyas.me"], # Vite default port
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
