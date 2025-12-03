@@ -6,10 +6,10 @@ WORKDIR /app
 
 # Install system dependencies
 # libpq-dev is needed for psycopg2 (PostgreSQL adapter)
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y \
+#     libpq-dev \
+#     gcc \
+#     && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file into the container at /app
 COPY requirements.txt .
