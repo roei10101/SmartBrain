@@ -24,7 +24,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/smartbrain
+      - DATABASE_URL=postgresql://postgres:postgresdemo@db:5432/smartbrain
       - ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=30
     depends_on:
