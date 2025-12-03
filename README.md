@@ -1,6 +1,6 @@
 # 🧠 SmartBrain - Your Second Brain for Academic Success
 
-![SmartBrain Banner]([https://images.unsplash.com/photo-1456324504439-367cee10d6b1?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D](https://github.com/roei10101/SmartBrain/blob/main/smart-brain.png?raw=true))
+![SmartBrain Banner]([https://github.com/roei10101/SmartBrain/blob/main/smart-brain.png])
 
 > **SmartBrain** is a comprehensive student management system designed to organize your academic life. From tracking assignments and grades to managing your study schedule and resources, SmartBrain acts as your digital "Second Brain," helping you stay focused and achieve your goals.
 
