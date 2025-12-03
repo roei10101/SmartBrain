@@ -157,14 +157,17 @@ Contributions are what make the open source community such an amazing place to l
 
 ---
 
+## 📞 Demo
+
+User: test@test.com
+
+Password: test
+
+Project Link: https://smartbrain.roeiduenyas.me/
+
 ## 📄 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-## 📞 Contact
-
-Roei Duenyas - [Your Email or Website]
-
-Project Link: [https://github.com/yourusername/smartbrain](https://github.com/yourusername/smartbrain)
