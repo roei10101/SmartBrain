@@ -23,7 +23,7 @@ const Register = () => {
         try {
             await register(email, password);
             navigate('/');
-        } catch (err) {
+        } catch {
             setError('Registration failed. Email might be taken.');
         }
     };

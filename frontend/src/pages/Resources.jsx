@@ -10,10 +10,6 @@ const Resources = () => {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [resourceToDelete, setResourceToDelete] = useState(null);
 
-    useEffect(() => {
-        fetchResources();
-    }, []);
-
     const fetchResources = async () => {
         try {
             const data = await api.getResources();
@@ -22,6 +18,10 @@ const Resources = () => {
             console.error("Failed to fetch resources:", error);
         }
     };
+
+    useEffect(() => {
+        fetchResources();
+    }, []);
 
     const handleCreateResource = async (e) => {
         e.preventDefault();
