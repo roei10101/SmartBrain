@@ -107,3 +107,17 @@ def test_users_cannot_see_or_modify_each_others_data(client, auth_headers):
 
     # ...and the owner's data is untouched
     assert client.get("/tasks/", headers=auth_headers).json()[0]["title"] == "private task"
+
+
+def test_list_endpoints_paginate_and_bound_the_page_size(client, auth_headers):
+    for index in range(3):
+        client.post("/notes/", json={"title": f"note {index}"}, headers=auth_headers)
+
+    first_page = client.get("/notes/?limit=2", headers=auth_headers).json()
+    second_page = client.get("/notes/?skip=2&limit=2", headers=auth_headers).json()
+
+    assert [note["title"] for note in first_page] == ["note 0", "note 1"]
+    assert [note["title"] for note in second_page] == ["note 2"]
+    assert client.get("/notes/?limit=100000", headers=auth_headers).status_code == 422
+    assert client.get("/notes/?limit=0", headers=auth_headers).status_code == 422
+    assert client.get("/notes/?skip=-1", headers=auth_headers).status_code == 422

@@ -1,8 +1,8 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from typing import List
+from typing import Annotated, List
 from datetime import timedelta
 import os
 
@@ -31,6 +31,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Pagination parameters shared by every list endpoint
+MAX_PAGE_SIZE = 200
+Skip = Annotated[int, Query(ge=0)]
+Limit = Annotated[int, Query(ge=1, le=MAX_PAGE_SIZE)]
 
 # Dependency
 get_db = database.get_db
@@ -101,7 +106,7 @@ def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db), current
     return crud.create_task(db=db, task=task, user_id=current_user.id)
 
 @app.get("/tasks/", response_model=List[schemas.Task])
-def read_tasks(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+def read_tasks(skip: Skip = 0, limit: Limit = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     return crud.get_tasks(db, user_id=current_user.id, skip=skip, limit=limit)
 
 @app.put("/tasks/{task_id}", response_model=schemas.Task)
@@ -124,7 +129,7 @@ def create_note(note: schemas.NoteCreate, db: Session = Depends(get_db), current
     return crud.create_note(db=db, note=note, user_id=current_user.id)
 
 @app.get("/notes/", response_model=List[schemas.Note])
-def read_notes(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+def read_notes(skip: Skip = 0, limit: Limit = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     return crud.get_notes(db, user_id=current_user.id, skip=skip, limit=limit)
 
 @app.put("/notes/{note_id}", response_model=schemas.Note)
@@ -147,7 +152,7 @@ def create_resource(resource: schemas.ResourceCreate, db: Session = Depends(get_
     return crud.create_resource(db=db, resource=resource, user_id=current_user.id)
 
 @app.get("/resources/", response_model=List[schemas.Resource])
-def read_resources(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+def read_resources(skip: Skip = 0, limit: Limit = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     return crud.get_resources(db, user_id=current_user.id, skip=skip, limit=limit)
 
 @app.delete("/resources/{resource_id}", response_model=schemas.Resource)
@@ -163,7 +168,7 @@ def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)
     return crud.create_project(db=db, project=project, user_id=current_user.id)
 
 @app.get("/projects/", response_model=List[schemas.Project])
-def read_projects(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+def read_projects(skip: Skip = 0, limit: Limit = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     return crud.get_projects(db, user_id=current_user.id, skip=skip, limit=limit)
 
 # Grades
@@ -172,7 +177,7 @@ def create_grade(grade: schemas.GradeCreate, db: Session = Depends(get_db), curr
     return crud.create_grade(db=db, grade=grade, user_id=current_user.id)
 
 @app.get("/grades/", response_model=List[schemas.Grade])
-def read_grades(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+def read_grades(skip: Skip = 0, limit: Limit = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     return crud.get_grades(db, user_id=current_user.id, skip=skip, limit=limit)
 
 # Events
@@ -181,7 +186,7 @@ def create_event(event: schemas.EventCreate, db: Session = Depends(get_db), curr
     return crud.create_event(db=db, event=event, user_id=current_user.id)
 
 @app.get("/events/", response_model=List[schemas.Event])
-def read_events(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+def read_events(skip: Skip = 0, limit: Limit = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     return crud.get_events(db, user_id=current_user.id, skip=skip, limit=limit)
 
 # Study Sessions
@@ -190,7 +195,7 @@ def create_study_session(study_session: schemas.StudySessionCreate, db: Session 
     return crud.create_study_session(db=db, study_session=study_session, user_id=current_user.id)
 
 @app.get("/study-sessions/", response_model=List[schemas.StudySession])
-def read_study_sessions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+def read_study_sessions(skip: Skip = 0, limit: Limit = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     return crud.get_study_sessions(db, user_id=current_user.id, skip=skip, limit=limit)
 
 @app.put("/study-sessions/{session_id}", response_model=schemas.StudySession)
