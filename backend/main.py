@@ -4,7 +4,12 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import timedelta
+import os
+
 from jose import JWTError, jwt
+from prometheus_fastapi_instrumentator import Instrumentator
+from sqlalchemy import text
+
 import models, schemas, crud, database, auth
 from database import engine
 
@@ -12,10 +17,16 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Student Second Brain API")
 
-# CORS
+# Prometheus metrics at /metrics (request count, latency, in-flight requests)
+Instrumentator(excluded_handlers=["/health", "/metrics"]).instrument(app).expose(app, include_in_schema=False)
+
+# CORS - comma separated list of allowed origins, e.g. "https://app.example.com,http://localhost:5173"
+DEFAULT_CORS_ORIGINS = "https://smartbrain.roeiduenyas.me,http://localhost:5173"
+cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", DEFAULT_CORS_ORIGINS).split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://smartbrain.roeiduenyas.me", "http://smartbrain.roeiduenyas.me"], # Vite default port
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,6 +58,15 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 @app.get("/")
 def read_root():
     return {"message": "Welcome to your Second Brain"}
+
+@app.get("/health", tags=["ops"])
+def health(db: Session = Depends(get_db)):
+    """Liveness/readiness probe: verifies the API is up and the database is reachable."""
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database unavailable")
+    return {"status": "ok"}
 
 # Auth
 @app.post("/token", response_model=schemas.Token)
