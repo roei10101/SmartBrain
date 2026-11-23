@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: smartbrain
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: smartbrain
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - postgres.yaml
+  - backend.yaml
+  - frontend.yaml
+  - ingress.yaml
+  - networkpolicy.yaml
+
+# CI pins these to the commit it just built: kustomize edit set image ...
+images:
+  - name: ghcr.io/roei10101/smartbrain-backend
+    newTag: latest
+  - name: ghcr.io/roei10101/smartbrain-frontend
+    newTag: latest
