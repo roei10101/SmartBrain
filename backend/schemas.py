@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing import List, Optional, Union
 from datetime import date
 
@@ -102,7 +102,9 @@ class UserBase(BaseModel):
     email: str
 
 class UserCreate(UserBase):
-    password: str
+    email: EmailStr
+    # bcrypt only reads the first 72 bytes of a password
+    password: str = Field(min_length=4, max_length=72)
 
 class User(UserBase):
     id: int

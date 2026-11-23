@@ -69,3 +69,18 @@ def test_token_signed_with_another_key_is_rejected(client):
     forged = jwt.encode({"sub": "erin@example.com"}, "attacker-key", algorithm="HS256")
     response = client.get("/users/me/", headers={"Authorization": f"Bearer {forged}"})
     assert response.status_code == 401
+
+
+def test_register_rejects_an_invalid_email(client):
+    response = client.post("/users/", json={"email": "not-an-email", "password": "pw123456"})
+    assert response.status_code == 422
+
+
+def test_register_rejects_a_too_short_password(client):
+    response = client.post("/users/", json={"email": "bob@example.com", "password": "abc"})
+    assert response.status_code == 422
+
+
+def test_register_rejects_a_password_longer_than_bcrypt_reads(client):
+    response = client.post("/users/", json={"email": "bob@example.com", "password": "x" * 73})
+    assert response.status_code == 422
