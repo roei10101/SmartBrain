@@ -1,10 +1,11 @@
-fastapi
-uvicorn
-sqlalchemy
+fastapi>=0.110
+uvicorn[standard]
+sqlalchemy>=2.0
 psycopg2-binary
 python-jose[cryptography]
 passlib[bcrypt]
 bcrypt==3.2.2
 python-multipart
 python-dotenv
-
+prometheus-fastapi-instrumentator
+pydantic>=2.0
