@@ -1,0 +1,27 @@
+# Replace the hosts with your own domain. The frontend image must be built with
+# VITE_API_URL pointing at the api host below.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: smartbrain
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: smartbrain.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port: {name: http}
+    - host: api.smartbrain.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port: {name: http}
