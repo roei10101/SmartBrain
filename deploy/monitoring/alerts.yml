@@ -1,0 +1,30 @@
+groups:
+  - name: smartbrain
+    rules:
+      - alert: BackendDown
+        expr: up{job="smartbrain-backend"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: SmartBrain backend is not answering scrapes
+
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{job="smartbrain-backend",status="5xx"}[5m]))
+            / sum(rate(http_requests_total{job="smartbrain-backend"}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: More than 5% of requests are failing with 5xx
+
+      - alert: SlowRequests
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="smartbrain-backend"}[5m])) by (le)) > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: p95 latency is above 1 second

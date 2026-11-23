@@ -19,6 +19,15 @@ const Tasks = () => {
         { title: 'Done', color: 'bg-emerald-500', status: 'Done' },
     ];
 
+    const fetchTasks = async () => {
+        try {
+            const data = await api.getTasks();
+            setTasks(data);
+        } catch (error) {
+            console.error("Failed to fetch tasks:", error);
+        }
+    };
+
     useEffect(() => {
         fetchTasks();
 
@@ -31,15 +40,6 @@ const Tasks = () => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
-    const fetchTasks = async () => {
-        try {
-            const data = await api.getTasks();
-            setTasks(data);
-        } catch (error) {
-            console.error("Failed to fetch tasks:", error);
-        }
-    };
 
     const handleCreateTask = async (e) => {
         e.preventDefault();

@@ -1,5 +1,8 @@
 # 🧠 SmartBrain - Your Second Brain for Academic Success
 
+[![CI](https://github.com/roei10101/SmartBrain/actions/workflows/ci.yml/badge.svg)](https://github.com/roei10101/SmartBrain/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 ![SmartBrain Banner](./smart-brain.png)
 
  **SmartBrain** is a comprehensive student management system designed to organize your academic life. From tracking assignments and grades to managing your study schedule and resources, SmartBrain acts as your digital "Second Brain," helping you stay focused and achieve your goals.
@@ -39,86 +42,134 @@ This project leverages a modern, high-performance tech stack:
 ### DevOps
 *   ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white) **Docker** - Containerize your applications.
 *   **Docker Compose** - Define and run multi-container Docker applications.
+*   **Kubernetes** - Kustomize manifests with probes, autoscaling and network policies.
+*   **GitHub Actions** - Lint, tests, config validation and image builds on every push.
+*   **Prometheus & Grafana** - Metrics, alert rules and dashboards.
 
 ---
 
 ## 🚀 Getting Started
 
-Follow these instructions to get a copy of the project up and running on your local machine.
-
 ### Prerequisites
 
-*   **Git**: [Download Git](https://git-scm.com/downloads)
-*   **Docker Desktop** (Recommended): [Download Docker](https://www.docker.com/products/docker-desktop/)
-*   *OR* for manual setup:
-    *   **Node.js** (v18+): [Download Node.js](https://nodejs.org/)
-    *   **Python** (v3.10+): [Download Python](https://www.python.org/downloads/)
-    *   **PostgreSQL**: [Download PostgreSQL](https://www.postgresql.org/download/)
+*   **Git** and **Docker** (with Docker Compose v2)
+*   *OR* for a manual setup: **Node.js 20+**, **Python 3.10+** and **PostgreSQL 15**
 
-### Installation
+### Option 1: Docker (recommended 🐳)
 
-#### Option 1: Using Docker (Recommended 🐳)
+```bash
+git clone https://github.com/roei10101/SmartBrain.git
+cd SmartBrain
 
-The easiest way to run SmartBrain is with Docker.
+# 1. Create your local configuration - no secret is stored in the repository
+cp .env.example .env
+#    then set POSTGRES_PASSWORD and SECRET_KEY, e.g. with: openssl rand -hex 32
 
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/roei10101/smartbrain.git
-    cd smartbrain
-    ```
+# 2. Build and start everything
+docker compose up --build
+```
 
-2.  **Run with Docker Compose**
-    ```bash
-    docker-compose up --build
-    ```
+| Service | URL |
+| :--- | :--- |
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:5000 |
+| API docs (Swagger) | http://localhost:5000/docs |
+| Health check | http://localhost:5000/health |
+| Prometheus metrics | http://localhost:5000/metrics |
 
-    That's it!
-    *   Frontend: `http://localhost:5173` (or the port specified in your docker setup)
-    *   Backend API: `http://localhost:5000`
-    *   API Docs: `http://localhost:5000/docs`
+Compose refuses to start when a required secret is missing, so a forgotten `.env` fails loudly instead of falling back to a default password.
 
-#### Option 2: Manual Setup 🛠️
+To seed the demo account: `docker compose exec backend python init_db.py`
 
-If you prefer to run it without Docker:
+For live reload during development:
 
-**1. Backend Setup**
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+### Option 2: Manual setup 🛠️
+
+```bash
+# Backend
+cd backend
+python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
+pip install -r requirements-dev.txt
+cp .env.example .env                               # set DATABASE_URL and SECRET_KEY
+python create_db.py                                # creates the database if needed
+uvicorn main:app --reload --port 5000
+
+# Frontend (second terminal)
+cd frontend
+npm install
+VITE_API_URL=http://localhost:5000 npm run dev     # http://localhost:5173
+```
+
+### Configuration
+
+| Variable | Used by | Description |
+| :--- | :--- | :--- |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | db, backend | Database credentials (Docker setup) |
+| `DATABASE_URL` | backend | Full connection string (manual setup) |
+| `SECRET_KEY` | backend | JWT signing key - **required**, the API will not start without it |
+| `ALGORITHM`, `ACCESS_TOKEN_EXPIRE_MINUTES` | backend | JWT settings (default `HS256`, `30`) |
+| `CORS_ORIGINS` | backend | Comma separated list of allowed origins |
+| `VITE_API_URL` | frontend (build time) | URL of the API as seen from the browser |
+
+---
+
+## 🧪 Tests & Code Quality
 
 ```bash
 cd backend
+ruff check .      # lint
+pytest            # API tests, run against an isolated SQLite database
 
-# Create a virtual environment
-python -m venv venv
-
-# Activate the virtual environment
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-# source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure Database
-# Ensure you have a PostgreSQL database running and update .env or database.py with your credentials.
-# Default: postgresql://postgres:postgresdemo@localhost:5432/smartbrain
-
-# Run the server
-uvicorn main:app --reload --port 5000
+cd frontend
+npm run lint
+npm run build
 ```
 
-**2. Frontend Setup**
+The backend suite covers authentication (hashing, login, expired and forged tokens), CRUD flows for every resource, and **tenant isolation** - one user can never read or modify another user's data.
+
+Every push and pull request runs the same checks in [GitHub Actions](.github/workflows/ci.yml): lint and tests, a frontend build, validation of the Compose and Kubernetes configuration, and a Docker build of both images. On `main` the images are pushed to GitHub Container Registry tagged with the commit SHA.
+
+---
+
+## ☸️ Deployment
+
+### Kubernetes
+
+Manifests live in [`deploy/k8s`](deploy/k8s) and are applied with Kustomize:
 
 ```bash
-cd frontend
+kubectl create namespace smartbrain
+kubectl -n smartbrain create secret generic smartbrain-secrets \
+  --from-literal=POSTGRES_PASSWORD="$(openssl rand -hex 24)" \
+  --from-literal=SECRET_KEY="$(openssl rand -hex 32)"
 
-# Install dependencies
-npm install
-
-# Run the development server
-npm run dev
+kubectl apply -k deploy/k8s
 ```
 
-Open your browser and navigate to the URL shown in the terminal (usually `http://localhost:5173`).
+What you get:
+
+*   **Backend** - 2 replicas, zero-downtime rolling updates, startup / readiness / liveness probes on `/health`, CPU-based autoscaling (2-5 pods) and a PodDisruptionBudget
+*   **Frontend** - static build served by unprivileged nginx
+*   **PostgreSQL** - StatefulSet with a persistent volume, reachable only from the backend (NetworkPolicy)
+*   **Hardening** - non-root containers, read-only root filesystem, all capabilities dropped, secrets injected from a `Secret` that is never committed
+*   **Ingress** - edit the hosts in `deploy/k8s/ingress.yaml` and `CORS_ORIGINS` in `configmap.yaml` for your domain
+
+### Monitoring
+
+The API exposes Prometheus metrics (request rate, latency histograms, status codes) at `/metrics`. A ready-made stack ships with the Compose file:
+
+```bash
+docker compose --profile monitoring up
+```
+
+*   Prometheus: http://localhost:9090 - scrape config and alert rules (backend down, 5xx rate above 5%, p95 latency above 1s) in [`deploy/monitoring`](deploy/monitoring)
+*   Grafana: http://localhost:3001 - Prometheus is pre-provisioned as a data source
+
+In Kubernetes the backend pods carry the standard `prometheus.io/scrape` annotations.
 
 ---
 
@@ -126,21 +177,27 @@ Open your browser and navigate to the URL shown in the terminal (usually `http:/
 
 ```
 SmartBrain/
-├── backend/                # FastAPI application
-│   ├── main.py             # App entry point
-│   ├── models.py           # Database models
-│   ├── schemas.py          # Pydantic schemas
-│   ├── crud.py             # Database operations
-│   ├── auth.py             # Authentication logic
-│   └── ...
-├── frontend/               # React application
+├── backend/                 # FastAPI application
+│   ├── main.py              # Routes, CORS, health and metrics endpoints
+│   ├── models.py            # SQLAlchemy models
+│   ├── schemas.py           # Pydantic schemas
+│   ├── crud.py              # Database operations (always scoped to the current user)
+│   ├── auth.py              # Password hashing and JWT handling
+│   ├── tests/               # pytest suite
+│   └── Dockerfile
+├── frontend/                # React + Vite application
 │   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Application pages
-│   │   ├── services/       # API calls
-│   │   └── ...
-├── docker-compose.yml      # Docker orchestration
-└── README.md               # You are here!
+│   │   ├── components/      # Reusable UI components
+│   │   ├── pages/           # Application pages
+│   │   └── services/        # API client
+│   ├── nginx.conf
+│   └── Dockerfile
+├── deploy/
+│   ├── k8s/                 # Kubernetes manifests (Kustomize)
+│   └── monitoring/          # Prometheus + Grafana configuration
+├── .github/workflows/ci.yml # CI/CD pipeline
+├── docker-compose.yml       # Local / single-host orchestration
+└── .env.example             # Configuration template
 ```
 
 ---
@@ -157,13 +214,11 @@ Contributions are what make the open source community such an amazing place to l
 
 ---
 
-## 📞 Demo
+## 🌐 Live Demo
 
-User: test@test.com
+**https://smartbrain.roeiduenyas.me/**
 
-Password: test
-
-Project Link: https://smartbrain.roeiduenyas.me/
+A shared demo account is available: `test@test.com` / `test`.
 
 ## 📄 License
 

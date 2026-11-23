@@ -25,7 +25,7 @@ class Project(Base):
     description = Column(String, nullable=True)
     deadline = Column(Date, nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    
+
     tasks = relationship("Task", back_populates="project")
     owner = relationship("User", back_populates="projects")
 

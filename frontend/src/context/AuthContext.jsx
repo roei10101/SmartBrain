@@ -7,16 +7,6 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            api.setToken(token);
-            fetchUser();
-        } else {
-            setLoading(false);
-        }
-    }, []);
-
     const fetchUser = async () => {
         try {
             const userData = await api.getCurrentUser();
@@ -28,6 +18,16 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            api.setToken(token);
+            fetchUser();
+        } else {
+            setLoading(false);
+        }
+    }, []);
 
     const login = async (email, password) => {
         const data = await api.login(email, password);
@@ -54,4 +54,5 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

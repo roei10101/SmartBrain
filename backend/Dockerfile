@@ -1,27 +1,22 @@
-# Use an official Python runtime as a parent image
-FROM python:3.10-slim
+FROM python:3.12-slim
 
-# Set the working directory in the container
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
-# Install system dependencies
-# libpq-dev is needed for psycopg2 (PostgreSQL adapter)
-# RUN apt-get update && apt-get install -y \
-#     libpq-dev \
-#     gcc \
-#     && rm -rf /var/lib/apt/lists/*
-
-# Copy the requirements file into the container at /app
 COPY requirements.txt .
-
-# Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the current directory contents into the container at /app
 COPY . .
 
-# Make port 8000 available to the world outside this container
+# Run as an unprivileged user
+RUN useradd --create-home --uid 10001 appuser
+USER appuser
+
 EXPOSE 5000
 
-# Run app.py when the container launches
+HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
+    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=2).status == 200 else 1)"
+
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]

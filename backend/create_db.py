@@ -1,47 +1,51 @@
-import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+"""Create the application database if it does not exist yet.
+
+Connection details are taken from DATABASE_URL (see .env.example) - nothing is hardcoded.
+Usage: python create_db.py
+"""
 import os
-from dotenv import load_dotenv
+import sys
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent
+import psycopg2
+from dotenv import load_dotenv
+from psycopg2 import sql
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from sqlalchemy.engine import make_url
 
+BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
-# Get credentials from env, but connect to 'postgres' db first
-db_url = os.getenv("DATABASE_URL")
-# Parse the URL manually or just hardcode for creation since we know the structure
-# postgresql://postgres:postgresdemo@localhost:5432/smartbrain
 
-user = "postgres"
-password = "postgresdemo"
-host = "localhost"
-port = "5432"
-dbname = "smartbrain"
+def create_database() -> None:
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        sys.exit("DATABASE_URL is not set. Copy .env.example to .env and fill it in.")
 
-def create_database():
+    url = make_url(db_url)
+    dbname = url.database
+
+    # Connect to the default 'postgres' database to be able to create ours
+    con = psycopg2.connect(
+        dbname="postgres",
+        user=url.username,
+        password=url.password,
+        host=url.host or "localhost",
+        port=url.port or 5432,
+    )
+    con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     try:
-        # Connect to default 'postgres' database
-        con = psycopg2.connect(dbname='postgres', user=user, host=host, password=password, port=port)
-        con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        cur = con.cursor()
-        
-        # Check if database exists
-        cur.execute(f"SELECT 1 FROM pg_catalog.pg_database WHERE datname = '{dbname}'")
-        exists = cur.fetchone()
-        
-        if not exists:
+        with con.cursor() as cur:
+            cur.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s", (dbname,))
+            if cur.fetchone():
+                print(f"Database {dbname} already exists.")
+                return
             print(f"Creating database {dbname}...")
-            cur.execute(f"CREATE DATABASE {dbname}")
+            cur.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(dbname)))
             print(f"Database {dbname} created successfully.")
-        else:
-            print(f"Database {dbname} already exists.")
-            
-        cur.close()
+    finally:
         con.close()
-    except Exception as e:
-        print(f"Error creating database: {e}")
+
 
 if __name__ == "__main__":
     create_database()

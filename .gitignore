@@ -36,3 +36,9 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets
+.env.*
+!.env.example
+*.db
+.ruff_cache/
