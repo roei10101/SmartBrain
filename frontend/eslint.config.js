@@ -24,6 +24,9 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // Pages load their data once on mount (fetch -> setState after the await),
+      // which this rule reports even though no synchronous cascade happens.
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
 ])

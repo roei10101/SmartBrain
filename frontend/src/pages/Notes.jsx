@@ -11,10 +11,6 @@ const Notes = () => {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [noteToDelete, setNoteToDelete] = useState(null);
 
-    useEffect(() => {
-        fetchNotes();
-    }, []);
-
     const fetchNotes = async () => {
         try {
             const data = await api.getNotes();
@@ -23,6 +19,10 @@ const Notes = () => {
             console.error("Failed to fetch notes:", error);
         }
     };
+
+    useEffect(() => {
+        fetchNotes();
+    }, []);
 
     const handleCreateNote = async (e) => {
         e.preventDefault();

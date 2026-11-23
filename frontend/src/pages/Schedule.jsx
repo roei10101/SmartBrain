@@ -4,7 +4,6 @@ import { api } from '../services/api';
 import ConfirmationModal from '../components/ui/ConfirmationModal';
 
 const Schedule = () => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const [currentDate, setCurrentDate] = useState(new Date());
     const [tasks, setTasks] = useState([]);
     const [studySessions, setStudySessions] = useState([]);
@@ -16,10 +15,6 @@ const Schedule = () => {
 
     // Form States
     const [sessionForm, setSessionForm] = useState({ subject: '', duration_minutes: '', date: new Date().toISOString().split('T')[0] });
-
-    useEffect(() => {
-        fetchData();
-    }, []);
 
     const fetchData = async () => {
         try {
@@ -33,6 +28,10 @@ const Schedule = () => {
             console.error("Failed to fetch schedule data:", error);
         }
     };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const handleLogSession = async (e) => {
         e.preventDefault();
