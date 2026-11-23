@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional, Union
 from datetime import date
 
@@ -17,8 +17,7 @@ class TaskCreate(TaskBase):
 
 class Task(TaskBase):
     id: int
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class NoteBase(BaseModel):
     title: str
@@ -32,8 +31,7 @@ class NoteCreate(NoteBase):
 
 class Note(NoteBase):
     id: int
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ResourceBase(BaseModel):
     title: str
@@ -46,8 +44,7 @@ class ResourceCreate(ResourceBase):
 
 class Resource(ResourceBase):
     id: int
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ProjectBase(BaseModel):
     title: str
@@ -60,8 +57,7 @@ class ProjectCreate(ProjectBase):
 class Project(ProjectBase):
     id: int
     tasks: List[Task] = []
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class GradeBase(BaseModel):
     subject: str
@@ -74,8 +70,7 @@ class GradeCreate(GradeBase):
 
 class Grade(GradeBase):
     id: int
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class EventBase(BaseModel):
     title: str
@@ -89,8 +84,7 @@ class EventCreate(EventBase):
 
 class Event(EventBase):
     id: int
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class StudySessionBase(BaseModel):
     subject: str
@@ -102,8 +96,7 @@ class StudySessionCreate(StudySessionBase):
 
 class StudySession(StudySessionBase):
     id: int
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class UserBase(BaseModel):
     email: str
@@ -114,8 +107,7 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     is_active: bool = True
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class Token(BaseModel):
     access_token: str
