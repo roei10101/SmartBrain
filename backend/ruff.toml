@@ -1,0 +1,9 @@
+line-length = 180
+target-version = "py310"
+
+[lint]
+select = ["E", "F", "W", "B"]
+# E401: the codebase groups its local imports on one line
+# B008: FastAPI's Depends() in argument defaults is the framework idiom
+# B904: HTTPException raised from handlers intentionally hides the cause
+ignore = ["E401", "B008", "B904"]
