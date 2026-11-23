@@ -1,4 +1,5 @@
-const API_URL = 'https://smartbrainbackend.roeiduenyas.me';
+// Set VITE_API_URL at build time (see .env.example); defaults to the hosted demo backend.
+const API_URL = (import.meta.env.VITE_API_URL || 'https://smartbrainbackend.roeiduenyas.me').replace(/\/$/, '');
 
 let token = null;
 
